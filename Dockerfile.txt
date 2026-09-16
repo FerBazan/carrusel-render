@@ -1,0 +1,8 @@
+FROM ghcr.io/puppeteer/puppeteer:23.11.1
+USER root
+WORKDIR /app
+COPY --chown=pptruser:pptruser package.json server.js ./
+RUN npm install --omit=dev
+USER pptruser
+EXPOSE 3000
+CMD ["node", "server.js"]
