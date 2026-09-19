@@ -60,10 +60,13 @@ app.post('/render', (req, res) => enqueue(async () => {
         if (el.scrollHeight > el.clientHeight + 2) bad.push('scrollHeight ' + el.scrollHeight + ' supera alto ' + el.clientHeight);
         const er = el.getBoundingClientRect();
         el.querySelectorAll('*').forEach(ch => {
+          // Elementos decorativos (pointer-events:none) pueden sangrar fuera del cuadro a proposito; no cuentan como overflow real
+          if (getComputedStyle(ch).pointerEvents === 'none') return;
           const r = ch.getBoundingClientRect();
           if (r.height === 0 && r.width === 0) return;
-          if (r.bottom > er.bottom + 2) bad.push('se pasa abajo: ' + (ch.className || ch.tagName));
-          if (r.top < er.top - 2) bad.push('se pasa arriba: ' + (ch.className || ch.tagName));
+          const label = typeof ch.className === 'string' ? ch.className : ((ch.className && ch.className.baseVal) || ch.tagName);
+          if (r.bottom > er.bottom + 2) bad.push('se pasa abajo: ' + label);
+          if (r.top < er.top - 2) bad.push('se pasa arriba: ' + label);
         });
         const failed = Array.from(el.querySelectorAll('img'))
           .filter(im => !(im.complete && im.naturalWidth > 0))
